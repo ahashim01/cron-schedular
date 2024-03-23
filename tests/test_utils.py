@@ -1,7 +1,6 @@
 import unittest
 from unittest.mock import patch
 from utils import measure_execution_time
-import logging
 import time
 
 
@@ -12,7 +11,7 @@ class TestUtils(unittest.TestCase):
     def test_measure_execution_time(self, time_mock, mock_logger_getter):
         @measure_execution_time
         def test_func():
-            time.sleep(1)
+            time.sleep(0)  # To simulate some work
 
         test_func()
         mock_logger_getter.assert_called_once()

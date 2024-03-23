@@ -1,5 +1,4 @@
 import unittest
-from unittest.mock import patch
 from datetime import datetime, timedelta
 from apscheduler.triggers.interval import IntervalTrigger
 from apscheduler.triggers.date import DateTrigger
@@ -31,7 +30,7 @@ class TestCronScheduler(unittest.TestCase):
     def test_add_duplicate_job(self):
         job_id = "duplicate_job"
         self.scheduler.add_job(job_id, tasks.sample_task, start_in="1m", args=self.args)
-        with self.assertRaises(ValueError, msg=f"Job ID {job_id} already exists."):
+        with self.assertRaisesRegex(ValueError, f"Job ID {job_id} already exists."):
             self.scheduler.add_job(
                 job_id, tasks.sample_task, start_in="1m", args=self.args
             )
@@ -48,13 +47,6 @@ class TestCronScheduler(unittest.TestCase):
         job_info = self.scheduler.get_job_info(job_id)
         self.assertEqual(job_info["id"], job_id)
         self.assertIsInstance(job_info["next_run_time"], datetime)
-
-    # @patch("scheduler.CronScheduler.execute_job")
-    # def test_job_execution(self, mock_execute_job):
-    #     job_id = "execute_job"
-    #     self.scheduler.add_job(job_id, tasks.sample_task, start_in="1m", args=self.args)
-    #     self.scheduler.execute_job(job_id, tasks.sample_task, *self.args)
-    #     mock_execute_job.assert_called_once_with(job_id, tasks.sample_task, *self.args)
 
     def test_create_trigger_with_start_in_and_frequency(self):
         start_in = "1m"
@@ -96,7 +88,9 @@ class TestCronScheduler(unittest.TestCase):
         self.assertEqual(trigger.interval, timedelta(hours=1))
 
     def test_create_trigger_without_start_in_and_frequency(self):
-        with self.assertRaises(ValueError):
+        with self.assertRaisesRegex(
+            ValueError, "Either start_in or frequency must be provided."
+        ):
             self.scheduler._create_trigger(None, None)
 
     def test_parse_time_with_valid_time_str(self):
@@ -106,15 +100,21 @@ class TestCronScheduler(unittest.TestCase):
 
     def test_parse_time_with_invalid_time_str(self):
         time_str = "invalid"
-        with self.assertRaises(
+        with self.assertRaisesRegex(
             ValueError,
-            msg="Invalid time format. Use '30m' for 30 minutes, '1h' for 1 hour, etc.",
+            "Invalid time format. Use '30m' for 30 minutes, '1h' for 1 hour, etc.",
         ):
             self.scheduler.parse_time(time_str)
 
     def test_parse_time_with_invalid_time_unit(self):
         time_str = "1d"
-        with self.assertRaises(
-            ValueError, msg="Invalid time unit. Use 'm' for minutes or 'h' for hours."
+        with self.assertRaisesRegex(
+            ValueError,
+            "Invalid time format. Use '30m' for 30 minutes, '1h' for 1 hour, etc.",
         ):
             self.scheduler.parse_time(time_str)
+
+    def test_add_job_with_invalid_function(self):
+        job_id = "invalid_func"
+        with self.assertRaisesRegex(ValueError, "invalid_function is not a function."):
+            self.scheduler.add_job(job_id, "invalid_function")

@@ -17,6 +17,11 @@ class CronScheduler:
     def add_job(
         self, job_id, func, start_in=None, frequency=None, args=None, kwargs=None
     ):
+        # Check if the function is callable
+        if not callable(func):
+            logger.error(f"{func} is not a function.")
+            raise ValueError(f"{func} is not a function.")
+
         if job_id in self.jobs:
             logger.error(f"Job ID {job_id} already exists.")
             raise ValueError(f"Job ID {job_id} already exists.")

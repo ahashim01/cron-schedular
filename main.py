@@ -32,7 +32,6 @@ def main():
         args=["Hello World! starting in 2 minutes and then every minute"],
     )
 
-    # Print the job info
     job_one_info = scheduler.get_job_info(job_one_id)
     job_two_info = scheduler.get_job_info(job_two_id)
     job_three_info = scheduler.get_job_info(job_three_id)
