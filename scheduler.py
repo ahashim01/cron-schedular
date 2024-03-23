@@ -1,6 +1,5 @@
 from apscheduler.schedulers.background import BackgroundScheduler
 from celery import Celery
-import datetime
 
 # Initialize Celery
 app = Celery("scheduler", broker="redis://redis:6379/0")
@@ -37,9 +36,3 @@ class CronScheduler:
     # Celery task wrapper
     def execute_job(self, job_id, func, *args, **kwargs):
         app.send_task("execute", args=(job_id, func, args, kwargs))
-
-
-@app.task(name="execute")
-def execute_task(job_id, func, args, kwargs):
-    print(f"Executing job {job_id} at {datetime.datetime.now()}")
-    func(*args, **kwargs)
