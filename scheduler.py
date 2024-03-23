@@ -3,7 +3,7 @@ from celery import Celery
 import datetime
 
 # Initialize Celery
-app = Celery("scheduler", broker="<broker_url>")
+app = Celery("scheduler", broker="redis://redis:6379/0")
 
 
 class CronScheduler:
