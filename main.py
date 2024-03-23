@@ -1,5 +1,8 @@
 from scheduler import CronScheduler
 import tasks
+from utils import configure_logger
+
+logger = configure_logger("main")
 
 
 def main():
@@ -33,16 +36,16 @@ def main():
     job_one_info = scheduler.get_job_info(job_one_id)
     job_two_info = scheduler.get_job_info(job_two_id)
     job_three_info = scheduler.get_job_info(job_three_id)
-    print(f"Job info: {job_one_info}")
-    print(f"Job info: {job_two_info}")
-    print(f"Job info: {job_three_info}")
+    logger.info(f"Job info: {job_one_info}")
+    logger.info(f"Job info: {job_two_info}")
+    logger.info(f"Job info: {job_three_info}")
 
     # Keeping the script running to let the scheduler operate
     try:
         while True:
             pass
     except (KeyboardInterrupt, SystemExit):
-        print("Shutting down the scheduler.")
+        logger.info("Shutting down the scheduler.")
         scheduler.scheduler.shutdown()
 
 
