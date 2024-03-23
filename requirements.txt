@@ -1,0 +1,2 @@
+APScheduler==3.10.4
+celery==5.3.6
