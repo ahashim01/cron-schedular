@@ -49,12 +49,12 @@ class TestCronScheduler(unittest.TestCase):
         self.assertEqual(job_info["id"], job_id)
         self.assertIsInstance(job_info["next_run_time"], datetime)
 
-    @patch("scheduler.CronScheduler.execute_job")
-    def test_job_execution(self, mock_execute_job):
-        job_id = "execute_job"
-        self.scheduler.add_job(job_id, tasks.sample_task, start_in="1m", args=self.args)
-        self.scheduler.execute_job(job_id, tasks.sample_task, *self.args)
-        mock_execute_job.assert_called_once_with(job_id, tasks.sample_task, *self.args)
+    # @patch("scheduler.CronScheduler.execute_job")
+    # def test_job_execution(self, mock_execute_job):
+    #     job_id = "execute_job"
+    #     self.scheduler.add_job(job_id, tasks.sample_task, start_in="1m", args=self.args)
+    #     self.scheduler.execute_job(job_id, tasks.sample_task, *self.args)
+    #     mock_execute_job.assert_called_once_with(job_id, tasks.sample_task, *self.args)
 
     def test_create_trigger_with_start_in_and_frequency(self):
         start_in = "1m"

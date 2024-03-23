@@ -1,14 +1,11 @@
 from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.triggers.interval import IntervalTrigger
 from apscheduler.triggers.date import DateTrigger
-from celery import Celery
 from datetime import datetime, timedelta
 import re
-from utils import configure_logger
+from utils import configure_logger, measure_execution_time
 
 logger = configure_logger("main")
-
-app = Celery("scheduler", broker="redis://redis:6379/0")
 
 
 class CronScheduler:
@@ -24,8 +21,13 @@ class CronScheduler:
             logger.error(f"Job ID {job_id} already exists.")
             raise ValueError(f"Job ID {job_id} already exists.")
 
+        # Wrap the function with the execution time measurer
+        wrapped_func = measure_execution_time(func)
+
         trigger = self._create_trigger(start_in, frequency)
-        job = self.scheduler.add_job(func, trigger, args=args, kwargs=kwargs, id=job_id)
+        job = self.scheduler.add_job(
+            wrapped_func, trigger, args=args, kwargs=kwargs, id=job_id
+        )
         self.jobs[job_id] = job
         logger.info(f"Job {job_id} added successfully.")
         return job_id
@@ -79,7 +81,3 @@ class CronScheduler:
         job = self.jobs[job_id]
         logger.info(f"Job {job_id} info retrieved successfully.")
         return {"id": job.id, "next_run_time": job.next_run_time}
-
-    def execute_job(self, job_id, func, *args, **kwargs):
-        logger.info(f"Executing job {job_id} with func {func} and args {args}")
-        app.send_task("execute", args=(job_id, func, args, kwargs))
