@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Task Scheduler</title>
+    <style>
+        body { font-family: Arial, sans-serif; }
+        form { margin-bottom: 20px; }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+        th { background-color: #f2f2f2; }
+    </style>
+</head>
+<body>
+    <h1>Task Scheduler</h1>
+
+    <h2>Schedule a Task</h2>
+    <form action="/schedule" method="post">
+        <label for="task">Select Task:</label><br>
+        <select name="task" id="task">
+            {% for task in available_tasks %}
+            <option value="{{ task }}">{{ task }}</option>
+            {% endfor %}
+        </select><br><br>
+
+        <label for="job_id">Unique Job ID:</label><br>
+        <input type="text" id="job_id" name="job_id"><br><br>
+
+        <label for="start_in">Start In (e.g., '30m'):</label><br>
+        <input type="text" id="start_in" name="start_in"><br><br>
+
+        <label for="frequency">Frequency (e.g., '1h'):</label><br>
+        <input type="text" id="frequency" name="frequency"><br><br>
+
+        <label for="args">Arguments (comma-separated):</label><br>
+        <input type="text" id="args" name="args"><br><br>
+
+        <label for="kwargs">Keyword Arguments (format: key1=value1, key2=value2):</label><br>
+        <input type="text" id="kwargs" name="kwargs"><br><br>
+
+
+        <input type="submit" value="Schedule Task">
+    </form>
+
+    <h2>Scheduled Tasks</h2>
+    <table>
+        <tr>
+            <th>Job ID</th>
+            <th>Task Name</th>
+            <th>Next Run Time</th>
+            <th>Status</th>
+            <th>Action</th>
+        </tr>
+        {% for job in jobs %}
+        <tr>
+            <td><a href="/job/{{ job.id }}">{{ job.id }}</a></td>
+            <td>{{ job.func.__name__ }}</td>
+            <td>{{ job.next_run_time }}</td>
+            <td>{{ job.status }}</td>
+            <td><a href="/remove/{{ job.id }}">Remove</a></td>
+        </tr>
+        {% endfor %}
+    </table>
+</body>
+</html>
