@@ -1,5 +1,7 @@
+from functools import wraps
+import time
 from apscheduler.schedulers.background import BackgroundScheduler
-from utils import configure_logger, measure_execution_time, SchedulerTrigger
+from utils import configure_logger, job_wrapper, SchedulerTrigger
 
 logger = configure_logger("main")
 
@@ -10,6 +12,7 @@ class CronScheduler:
         self.create_trigger = SchedulerTrigger()
         self.scheduler.start()
         self.jobs = {}
+        self.execution_times = {}
 
     def add_job(
         self, job_id, func, start_in=None, frequency=None, args=None, kwargs=None
@@ -23,8 +26,7 @@ class CronScheduler:
             logger.error(f"Job ID {job_id} already exists.")
             raise ValueError(f"Job ID {job_id} already exists.")
 
-        # Wrap the function with the execution time measurer
-        wrapped_func = measure_execution_time(func)
+        wrapped_func = job_wrapper(func, self, job_id)
 
         trigger = self.create_trigger.perform(start_in, frequency)
         job = self.scheduler.add_job(
@@ -48,4 +50,7 @@ class CronScheduler:
             raise ValueError(f"Job ID {job_id} not found.")
         job = self.jobs[job_id]
         logger.info(f"Job {job_id} info retrieved successfully.")
-        return {"id": job.id, "next_run_time": job.next_run_time}
+        return {"id": job.id, "name": job.name, "next_run_time": job.next_run_time}
+
+    def get_execution_time(self, job_id):
+        return self.execution_times.get(job_id)

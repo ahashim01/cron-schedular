@@ -62,7 +62,10 @@ def remove(job_id):
 @app.route("/job/<job_id>")
 def job_details(job_id):
     job = scheduler.get_job_info(job_id)
+    execution_time = scheduler.get_execution_time(job_id)
     if job:
-        return render_template("job_details.html", job=job)
+        return render_template(
+            "job_details.html", job=job, execution_time=execution_time
+        )
     else:
         return "Job not found", 404

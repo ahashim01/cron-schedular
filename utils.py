@@ -32,6 +32,27 @@ def measure_execution_time(func):
     return wrapper
 
 
+def job_wrapper(func, scheduler, job_id):
+    logger = logging.getLogger("main")
+
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        start_time = time.time()
+        result = func(*args, **kwargs)
+        end_time = time.time()
+
+        # Calculate the execution time in milliseconds and round it to 4 decimal places
+        execution_time = round((end_time - start_time) * 1000, 4)
+        scheduler.execution_times[job_id] = execution_time
+        logger.info(
+            f"Execution time of {func.__name__}: {((end_time - start_time)* 1000):.4f} ms"
+        )
+
+        return result
+
+    return wrapper
+
+
 class SchedulerTrigger:
     def __init__(self):
         self.logger = configure_logger("main")

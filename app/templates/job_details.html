@@ -20,8 +20,16 @@
             <td>{{ job.id }}</td>
         </tr>
         <tr>
+            <th>Task Name</th>
+            <td>{{ job.name }}</td>
+        </tr>
+        <tr>
             <th>Next Run Time</th>
             <td>{{ job.next_run_time }}</td>
+        </tr>
+        <tr>
+            <th>Execution Time</th>
+            <td>{{ execution_time }} ms</td>
         </tr>
         <!-- Include other job details we want to display -->
     </table>
