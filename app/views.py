@@ -9,15 +9,17 @@ scheduler = CronScheduler()
 
 @app.route("/")
 def index():
-    # List all available tasks from tasks.py
     available_tasks = [
         name
         for name in dir(tasks)
         if callable(getattr(tasks, name)) and not name.startswith("__")
     ]
-    jobs = list(scheduler.jobs.values())
-    print("JOBS:", jobs)
-    return render_template("index.html", available_tasks=available_tasks, jobs=jobs)
+
+    jobs_info = [scheduler.get_job_info(job_id) for job_id in scheduler.jobs.keys()]
+
+    return render_template(
+        "index.html", available_tasks=available_tasks, jobs=jobs_info
+    )
 
 
 @app.route("/schedule", methods=["POST"])
@@ -62,14 +64,7 @@ def remove(job_id):
 @app.route("/job/<job_id>")
 def job_details(job_id):
     job = scheduler.get_job_info(job_id)
-    execution_time = scheduler.get_execution_time(job_id)
-    error_info = scheduler.get_job_error(job_id)
     if job:
-        return render_template(
-            "job_details.html",
-            job=job,
-            execution_time=execution_time,
-            error_info=error_info,
-        )
+        return render_template("job_details.html", job=job)
     else:
         return "Job not found", 404

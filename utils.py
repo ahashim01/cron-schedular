@@ -38,21 +38,33 @@ def job_wrapper(func, scheduler, job_id):
     @wraps(func)
     def wrapper(*args, **kwargs):
         try:
+            scheduler.update_job_data(job_id, "status", scheduler.STATUS_RUNNING)
             start_time = time.time()
+
             result = func(*args, **kwargs)
+
             end_time = time.time()
-
-            # Calculate the execution time in milliseconds and round it to 4 decimal places
             execution_time = f"{((end_time - start_time) * 1000):.4f} ms"
-            scheduler.execution_times[job_id] = execution_time
-            logger.info(
-                f"Execution time of {func.__name__}: {((end_time - start_time)* 1000):.4f} ms"
-            )
 
+            scheduler.update_job_data(
+                job_id, "run_count", scheduler.job_data[job_id]["run_count"] + 1
+            )
+            scheduler.update_job_data(job_id, "execution_time", execution_time)
+            if scheduler.job_data[job_id]["type"] == "Single Run":
+                scheduler.update_job_data(job_id, "status", scheduler.STATUS_COMPLETED)
+            else:
+                scheduler.update_job_data(job_id, "status", scheduler.STATUS_SCHEDULED)
+
+            logger.info(
+                f"Job {job_id} (Function: {func.__name__}) execution time: {execution_time} seconds"
+            )
             return result
+
         except Exception as e:
             error_info = f"{type(e).__name__}: {e}"
-            scheduler.job_errors[job_id] = error_info
+            scheduler.update_job_data(job_id, "error", error_info)
+            scheduler.update_job_data(job_id, "status", scheduler.STATUS_FAILED)
+
             logger.error(f"Error in job {job_id}: {error_info}")
 
     return wrapper

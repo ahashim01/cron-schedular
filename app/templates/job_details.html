@@ -28,12 +28,24 @@
             <td>{{ job.next_run_time }}</td>
         </tr>
         <tr>
-            <th>Execution Time</th>
-            <td>{{ execution_time }}</td>
+            <th>Status</th>
+            <td>{{ job.status }}</td>
+        </tr>
+        <tr>
+            <th>Type</th>
+            <td>{{ job.type }}</td>
+        </tr>
+        <tr>
+            <th>Last Execution Time</th>
+            <td>{{ job.execution_time }}</td>
         </tr>
         <tr>
             <th>Error</th>
-            <td>{{ error_info }}</td>
+            <td>{{ job.error }}</td>
+        </tr>
+        <tr>
+            <th>Run Count</th>
+            <td>{{ job.run_count }}</td>
         </tr>
         <!-- Include other job details we want to display -->
     </table>
