@@ -19,11 +19,37 @@ class TestCronScheduler(unittest.TestCase):
     def tearDown(self):
         self.scheduler.scheduler.shutdown()
 
-    def test_add_job(self):
+    def test_add_job_single_run(self):
         job_id = "test_job"
         self.scheduler.add_job(job_id, tasks.sample_task, start_in="1m", args=self.args)
         self.assertIn(job_id, self.scheduler.jobs)
         self.assertIsNotNone(self.scheduler.jobs[job_id])
+        self.assertEqual(
+            self.scheduler.job_data[job_id],
+            {
+                "execution_time": None,
+                "error": None,
+                "run_count": 0,
+                "type": "Single Run",
+            },
+        )
+
+    def test_add_job_periodic(self):
+        job_id = "test_job_periodic"
+        self.scheduler.add_job(
+            job_id, tasks.sample_task, frequency="1m", args=self.args
+        )
+        self.assertIn(job_id, self.scheduler.jobs)
+        self.assertIsNotNone(self.scheduler.jobs[job_id])
+        self.assertEqual(
+            self.scheduler.job_data[job_id],
+            {
+                "execution_time": None,
+                "error": None,
+                "run_count": 0,
+                "type": "Periodic",
+            },
+        )
 
     def test_add_duplicate_job(self):
         job_id = "duplicate_job"
@@ -44,11 +70,15 @@ class TestCronScheduler(unittest.TestCase):
         self.scheduler.add_job(job_id, tasks.sample_task, start_in="1m", args=self.args)
         job_info = self.scheduler.get_job_info(job_id)
         self.assertEqual(job_info["id"], job_id)
-        self.assertIsInstance(job_info["next_run_time"], datetime)
+        self.assertEqual(job_info["name"], "sample_task")
+        self.assertIsNotNone(job_info["next_run_time"])
+        self.assertEqual(job_info["type"], "Single Run")
 
     def test_add_job_with_invalid_function(self):
         job_id = "invalid_func"
-        with self.assertRaisesRegex(ValueError, "invalid_function is not a function."):
+        with self.assertRaisesRegex(
+            TypeError, "invalid_function is not a callable function."
+        ):
             self.scheduler.add_job(job_id, "invalid_function")
 
     def test_concurrent_jobs(self):
@@ -64,3 +94,11 @@ class TestCronScheduler(unittest.TestCase):
         self.assertIn(job_two_id, self.scheduler.jobs)
         self.assertIsNotNone(self.scheduler.jobs[job_one_id])
         self.assertIsNotNone(self.scheduler.jobs[job_two_id])
+
+    def test_update_job_data(self):
+        job_id = "update_job_data"
+        self.scheduler.add_job(job_id, tasks.sample_task, start_in="1m", args=self.args)
+        self.scheduler.update_job_data(job_id, "run_count", 1)
+        self.assertEqual(self.scheduler.job_data[job_id]["run_count"], 1)
+        self.scheduler.update_job_data(job_id, "error", "Test Error")
+        self.assertEqual(self.scheduler.job_data[job_id]["error"], "Test Error")
