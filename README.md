@@ -1,89 +1,58 @@
-# Python Cron Scheduler
+# Cron Scheduler Application
 
-### Project Overview
+## Description
 
-This project implements a simple yet powerful in-process cron scheduler in Python. Utilizing Celery for task queuing and APScheduler for job scheduling, this scheduler is designed to execute multiple jobs concurrently, following specified intervals.
+This cron scheduler is an in-process tool designed to schedule and execute jobs periodically. It allows clients to specify job intervals, frequencies, and unique identifiers for each job. Built in Python, it leverages the `apscheduler` library to manage job scheduling efficiently.
 
-### Setup and Installation
+## Technical Decisions
 
-#### Prerequisites
+1. **Python**: Chosen for its simplicity and readability, and extensive library support.
+2. **APScheduler**: Utilized for its robust scheduling capabilities.
+3. **Logging and Execution Time Measurement**: Implemented for effective monitoring and debugging.
 
-- Docker
-- Docker Compose
+## Trade-offs
 
-### Running the Application
+- Simplicity over Complexity: Opted for a straightforward implementation to ensure ease of understanding and maintenance.
+- Python's GIL (Global Interpreter Lock) limits the concurrency, which could affect performance under high load.
 
-1. Clone the repository:
-
-```bash
-git clone git@github.com:ahashim01/cron-schedular.git
-```
-
-2. Navigate to the project directory:
-
-```bash
-cd cron-schedular
-```
-
-3. Build and run the Docker container:
-
-```bash
-docker compose up --build
-```
-
-**_The application and Redis will start in Docker containers._**
-
-### Usage
-
-#### To schedule a new job:
-
-1. Define your task in tasks.py.
-2. In main.py, use the CronScheduler to add your job with a unique job ID, the task function, and the scheduling interval.
-3. Run the application as described in the setup section.
-
-**_Example:_**
+## Example Usage
 
 ```python
-# In main.py
-scheduler.add_job("job1", tasks.sample_task, interval=1, args=["Hello, world!"])
+from scheduler import CronScheduler
+import tasks
+from utils import configure_logger
+
+def main():
+    scheduler = CronScheduler()
+
+    scheduler.add_job(
+        "single_run",
+        tasks.sample_task,
+        start_in="1m",
+        args=["Hello World! once after 1 minute"],
+    )
+
+    scheduler.add_job(
+        "regular_frequency",
+        tasks.sample_task,
+        frequency="1m",
+        args=["Hello World! every minute"],
+    )
+
+    # Keep the script running to let the scheduler operate
+    try:
+        while True:
+            pass
+    except (KeyboardInterrupt, SystemExit):
+        scheduler.scheduler.shutdown()
+
+if __name__ == "__main__":
+    main()
 ```
 
-#### To remove a job:
+## Future Improvements
 
-1. In main.py, use the CronScheduler to remove the job by its unique job ID.
-2. Run the application as described in the setup section.
-
-**_Example:_**
-
-```python
-# In main.py
-scheduler.remove_job("job1")
-```
-
-### Testing
-
-Run the tests to ensure everything is working as expected:
-
-```bash
-docker compose run web python -m unittest tests/test*.py
-```
-
-### Technical Decisions
-
-- **Python**: Chosen for its simplicity and robust libraries for task scheduling and concurrency.
-- **Celery**: Used for managing asynchronous task queues.
-- **Redis**: Used as the message broker for Celery.
-- **APScheduler**: Integrated for handling the scheduling of jobs.
-- **Docker**: Ensures a consistent environment, avoiding the "it works on my machine" problem.
-
-### Trade-offs
-
-- Using Docker adds a layer of complexity for deployment but offers benefits in consistency and scalability.
-- Celery, while powerful, might introduce some overhead for smaller applications.
-
-### Possible Future Improvements
-
-- Enhanced error handling and retry mechanisms.
-- Support for more complex scheduling scenarios.
-- Scaling the application for high availability and distributed processing.
-- Adding a RESTful API for job management.
+1. Enhance task variety in `tasks.py`.
+2. More robust error handling and exception management.
+3. Comprehensive documentation and testing for reliability.
+4. Additional customization options for logging and scheduler settings.

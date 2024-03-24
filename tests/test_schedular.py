@@ -118,3 +118,17 @@ class TestCronScheduler(unittest.TestCase):
         job_id = "invalid_func"
         with self.assertRaisesRegex(ValueError, "invalid_function is not a function."):
             self.scheduler.add_job(job_id, "invalid_function")
+
+    def test_concurrent_jobs(self):
+        job_one_id = "concurrent_job_one"
+        job_two_id = "concurrent_job_two"
+        self.scheduler.add_job(
+            job_one_id, tasks.sample_task, start_in="1m", args=self.args
+        )
+        self.scheduler.add_job(
+            job_two_id, tasks.sample_task, start_in="1m", args=self.args
+        )
+        self.assertIn(job_one_id, self.scheduler.jobs)
+        self.assertIn(job_two_id, self.scheduler.jobs)
+        self.assertIsNotNone(self.scheduler.jobs[job_one_id])
+        self.assertIsNotNone(self.scheduler.jobs[job_two_id])
