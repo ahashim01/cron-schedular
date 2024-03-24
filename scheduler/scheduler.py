@@ -13,6 +13,7 @@ class CronScheduler:
         self.scheduler.start()
         self.jobs = {}
         self.execution_times = {}
+        self.job_errors = {}
 
     def add_job(
         self, job_id, func, start_in=None, frequency=None, args=None, kwargs=None
@@ -54,3 +55,6 @@ class CronScheduler:
 
     def get_execution_time(self, job_id):
         return self.execution_times.get(job_id)
+
+    def get_job_error(self, job_id):
+        return self.job_errors.get(job_id)
