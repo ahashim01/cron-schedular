@@ -6,9 +6,15 @@ Cron-App is an in-process cron scheduler built in Python, utilizing APScheduler 
 
 ## Technical Decisions
 
-- **APScheduler**: Chosen for robust scheduling within a Python process, providing flexibility and ease of use.
-- **Flask**: Facilitates a web interface to interact with the scheduler, offering a user-friendly method to manage scheduled tasks.
-- **Modular Structure**: The project is structured with `app` for web functionalities, `scheduler` for scheduling logic, and `tests` for unit testing.
+- **Python (3.10)**: Used as the primary programming language due to its readability, ease of use, and extensive standard library. Python's vast ecosystem of libraries, including APScheduler and Flask, provides a rich set of tools to build the application effectively. Its interpretative nature also facilitates rapid development and iteration.
+
+- **APScheduler**: Selected for its robust scheduling capabilities within a Python process. APScheduler provides flexible and powerful scheduling options, including support for cron-like jobs, which aligns well with the requirements of the project. It's also well-documented and widely used, offering reliability and community support.
+
+- **Flask**: Chosen for the web interface due to its simplicity and ease of use. Flask is a lightweight web framework that is easy to get started with, yet powerful enough to handle the web interface requirements of this project. It allows for quick development and prototyping, making it ideal for a project of this scope.
+
+- **Modular Structure**: The project is organized into modular components (`app`, `scheduler`, and `tests`) to promote separation of concerns and scalability. This structure not only enhances the readability and maintainability of the code but also allows for easier testing and future expansions.
+
+These decisions were made to balance the need for robust functionality, ease of development, quick deployment, and future scalability of the application.
 
 ## Trade-offs
 
