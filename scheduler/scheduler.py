@@ -39,6 +39,7 @@ class CronScheduler:
 
         self.jobs[job_id] = job
         self.job_data[job_id] = {
+            "status": self.STATUS_SCHEDULED,
             "execution_time": None,
             "error": None,
             "run_count": 0,
