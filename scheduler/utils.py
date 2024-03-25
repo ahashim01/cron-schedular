@@ -17,21 +17,6 @@ def configure_logger(logger_name):
     return logger
 
 
-def measure_execution_time(func):
-    @wraps(func)
-    def wrapper(*args, **kwargs):
-        start_time = time.time()
-        result = func(*args, **kwargs)
-        end_time = time.time()
-        logger = logging.getLogger("main")
-        logger.info(
-            f"Execution time of {func.__name__}: {((end_time - start_time)* 1000):.4f} ms"
-        )
-        return result
-
-    return wrapper
-
-
 def job_wrapper(func, scheduler, job_id):
     logger = logging.getLogger("main")
 
@@ -56,7 +41,7 @@ def job_wrapper(func, scheduler, job_id):
                 scheduler.update_job_data(job_id, "status", scheduler.STATUS_SCHEDULED)
 
             logger.info(
-                f"Job {job_id} (Function: {func.__name__}) execution time: {execution_time} seconds"
+                f"Job {job_id} (Function: {func.__name__}) execution time: {execution_time}"
             )
             return result
 

@@ -1,5 +1,5 @@
 from apscheduler.schedulers.background import BackgroundScheduler
-from utils import configure_logger, job_wrapper, SchedulerTrigger
+from scheduler.utils import configure_logger, job_wrapper, SchedulerTrigger
 
 logger = configure_logger("main")
 

@@ -1,28 +1,97 @@
-import time
 from datetime import datetime, timedelta
 from unittest.mock import patch
 import unittest
+from scheduler.scheduler import CronScheduler
 
 import pytz
 from apscheduler.triggers.date import DateTrigger
 from apscheduler.triggers.interval import IntervalTrigger
 
-from utils import measure_execution_time, SchedulerTrigger
+from scheduler.utils import job_wrapper, SchedulerTrigger
 
 
-class TestExecutionTime(unittest.TestCase):
+class TestJobWrapper(unittest.TestCase):
+    def setUp(self):
+        self.scheduler = CronScheduler()
+        self.scheduler.job_data = {
+            "test_job": {
+                "execution_time": None,
+                "error": None,
+                "run_count": 0,
+                "type": "Single Run",
+            }
+        }
 
-    @patch("logging.getLogger")
-    @patch("time.time", side_effect=[0, 1])
-    def test_measure_execution_time(self, time_mock, mock_logger_getter):
-        @measure_execution_time
-        def test_func():
-            time.sleep(0)  # To simulate some work
+    def tearDown(self):
+        self.scheduler.scheduler.shutdown()
 
-        test_func()
-        mock_logger_getter.assert_called_once()
-        mock_logger_getter.return_value.info.assert_called_once_with(
-            "Execution time of test_func: 1000.0000 ms"
+    @patch("scheduler.utils.logging.getLogger")
+    @patch("scheduler.scheduler.CronScheduler.update_job_data")
+    @patch("time.time")
+    def test_job_wrapper(self, mock_time, mock_update_job_data, mock_logger):
+        mock_time.side_effect = [1, 2]
+
+        def sample_task():
+            return "Task executed successfully."
+
+        wrapped_func = job_wrapper(sample_task, self.scheduler, "test_job")
+        result = wrapped_func()
+
+        # assert the calls to update_job_data
+        # assert call count
+        self.assertEqual(mock_update_job_data.call_count, 4)
+        mock_update_job_data.assert_any_call(
+            "test_job", "status", self.scheduler.STATUS_RUNNING
+        )
+        mock_update_job_data.assert_any_call("test_job", "run_count", 1)
+        mock_update_job_data.assert_any_call(
+            "test_job", "execution_time", "1000.0000 ms"
+        )
+        mock_update_job_data.assert_any_call(
+            "test_job", "status", self.scheduler.STATUS_COMPLETED
+        )
+
+        # assert logging calls
+        mock_logger.assert_called_once_with("main")
+        mock_logger.return_value.info.assert_called_once_with(
+            "Job test_job (Function: sample_task) execution time: 1000.0000 ms"
+        )
+
+        # assert the result of the wrapped function
+        self.assertEqual(result, "Task executed successfully.")
+
+    @patch("scheduler.utils.logging.getLogger")
+    @patch("scheduler.scheduler.CronScheduler.update_job_data")
+    @patch("time.time")
+    def test_job_wrapper_with_exception(
+        self, mock_time, mock_update_job_data, mock_logger
+    ):
+        mock_time.side_effect = [1, 2]
+
+        def sample_task():
+            raise ValueError("Task failed.")
+
+        wrapped_func = job_wrapper(sample_task, self.scheduler, "test_job")
+
+        wrapped_func()
+
+        # assert the calls to update_job_data
+        # assert call count
+        self.assertEqual(mock_update_job_data.call_count, 3)
+        mock_update_job_data.assert_any_call(
+            "test_job", "status", self.scheduler.STATUS_RUNNING
+        )
+        mock_update_job_data.assert_any_call(
+            "test_job", "error", "ValueError: Task failed."
+        )
+        mock_update_job_data.assert_any_call(
+            "test_job", "status", self.scheduler.STATUS_FAILED
+        )
+
+        # assert logging calls
+        mock_logger.assert_called_once_with("main")
+        mock_logger.return_value.error.assert_called_once_with(
+            "Error in job test_job: ValueError: Task failed."
         )
 
 

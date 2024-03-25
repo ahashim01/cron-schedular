@@ -1,5 +1,4 @@
 import unittest
-from datetime import datetime
 from scheduler.scheduler import CronScheduler
 import scheduler.tasks as tasks
 import pytz
