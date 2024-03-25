@@ -30,6 +30,7 @@ class TestCronScheduler(unittest.TestCase):
                 "error": None,
                 "run_count": 0,
                 "type": "Single Run",
+                "status": "Scheduled",
             },
         )
 
@@ -47,6 +48,7 @@ class TestCronScheduler(unittest.TestCase):
                 "error": None,
                 "run_count": 0,
                 "type": "Periodic",
+                "status": "Scheduled",
             },
         )
 
